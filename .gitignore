@@ -1,0 +1,28 @@
+# Environment — never commit secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Moondream model cache (large, re-downloads automatically)
+*.onnx
+*.bin
+*.safetensors
+moondream-*
+
+# macOS
+.DS_Store
+
+# Coverage memory (runtime state, not source)
+lens/data/coverage_memory.json
