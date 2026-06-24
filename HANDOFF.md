@@ -2,7 +2,7 @@
 
 **Last updated:** June 24, 2026
 **Active branch:** `claude/youthful-sagan-fbluj3`
-**Latest commit:** `0572091` (README)
+**Latest commit:** `52fbbfb` (Context Ingestor + fixture brief)
 
 This doc is the single source of truth for project state. Read it first whenever resuming, on web or local laptop.
 
@@ -48,6 +48,7 @@ When you finish an evening task, push any code changes (if any) and update this 
 ### Built & merged
 - Day 1 scaffold (commit `1edb2c3`): `camera.py`, `tts.py`, `memory.py`, `manifest.py`, `agents/environment_monitor.py`, `agents/director.py`, `notebooks/01_core_loop.ipynb`, `requirements.txt`, `.env.example`.
 - Project `README.md` (commit `0572091`).
+- `agents/context_ingestor.py` + `tests/fixtures/sample_brief.txt` (commit `52fbbfb`) — Haiku turns a brief into a `CoverageManifest` matching `STUB_MANIFEST`'s shape.
 
 ### Validated end-to-end on hardware
 - Nothing yet on this device. Day 1 was scaffolded last night but never run through to a spoken directive on the new laptop. **First evening task.**
@@ -64,7 +65,7 @@ When you finish an evening task, push any code changes (if any) and update this 
 
 In suggested order — each is independently shippable:
 
-- [ ] **`agents/context_ingestor.py`** — Haiku call that takes an event brief as plain text and returns a `CoverageManifest` dict matching the shape of `STUB_MANIFEST`. Includes a fixture brief in `tests/fixtures/` for smoke-testing without I/O.
+- [x] **`agents/context_ingestor.py`** — shipped in `52fbbfb`. Public surface: `ingest_brief(brief_text: str) -> dict`. Fixture: `tests/fixtures/sample_brief.txt`. **Untested live** — needs a laptop run with `ANTHROPIC_API_KEY` set to confirm the JSON parses end-to-end against `STUB_MANIFEST`'s shape.
 - [ ] **`agents/footage_analyzer.py`** — Gemini Flash. Takes a captured clip (or a representative frame), returns which required-shot label it satisfies. Calls into `CoverageMemory.add_capture()`.
 - [ ] **`agents/adaptive_scheduler.py`** — Gemini Flash. Periodically re-ranks remaining gaps based on elapsed time and event phase. Writes the reprioritized manifest back to `data/coverage_manifest.json`.
 - [ ] **`notebooks/03_multi_agent.ipynb`** — wires all five agents together using fixtures (sample brief, sample frames) so the full flow can be exercised without a camera.
@@ -75,7 +76,14 @@ In suggested order — each is independently shippable:
 
 - [ ] **Day-1 exit criterion:** run `lens/notebooks/01_core_loop.ipynb` cells 1 → 3 → 5 → 7 → 9 and confirm a spoken directive. First run downloads Moondream (~1.2GB) — do it on Wi-Fi. Done = you hear the directive.
 - [ ] Confirm the continuous loop (cell 11) actually behaves: scene-change gate triggers, 90s cooldown is respected, no runaway TTS.
-- [ ] Once Context Ingestor lands: drop a real event brief into a text file, run it through, eyeball the manifest.
+- [ ] **Smoke-test Context Ingestor.** Quick snippet:
+  ```python
+  from lens.agents.context_ingestor import ingest_brief
+  brief = open("tests/fixtures/sample_brief.txt").read()
+  manifest = ingest_brief(brief)
+  import json; print(json.dumps(manifest, indent=2))
+  ```
+  Confirm the dict has keys `event_name`, `themes`, `desired_output`, `key_moments`, `required_shots`, `preferred_shots` — same shape as `STUB_MANIFEST`. Then try a real brief of your own.
 - [ ] Once `03_multi_agent.ipynb` lands: walk through the multi-agent loop on the laptop with the real camera.
 
 ### Pi sessions (later)
