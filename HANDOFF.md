@@ -2,7 +2,7 @@
 
 **Last updated:** June 24, 2026
 **Active branch:** `claude/youthful-sagan-fbluj3`
-**Latest commit:** `<pending>` (Director shape test + friendly missing-key errors)
+**Latest commit:** `b245f42` (Director shape test; all four LLM agents now covered)
 
 This doc is the single source of truth for project state. Read it first whenever resuming, on web or local laptop.
 
