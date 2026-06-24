@@ -2,7 +2,7 @@
 
 **Last updated:** June 24, 2026
 **Active branch:** `claude/youthful-sagan-fbluj3`
-**Latest commit:** `0555e3b` (Footage Analyzer)
+**Latest commit:** `<pending>` (Adaptive Scheduler)
 
 This doc is the single source of truth for project state. Read it first whenever resuming, on web or local laptop.
 
@@ -67,7 +67,7 @@ In suggested order — each is independently shippable:
 
 - [x] **`agents/context_ingestor.py`** — shipped in `52fbbfb`. Public surface: `ingest_brief(brief_text: str) -> dict`. Fixture: `tests/fixtures/sample_brief.txt`. **Untested live** — needs a laptop run with `ANTHROPIC_API_KEY` set to confirm the JSON parses end-to-end against `STUB_MANIFEST`'s shape.
 - [x] **`agents/footage_analyzer.py`** — shipped. Public surface: `analyze_frame(image: PIL.Image, manifest: dict) -> dict`. Uses `gemini-2.5-flash`. The agent is stateless — the caller (notebook / scheduler) is responsible for taking a non-null `satisfies` value and calling `CoverageMemory.add_capture(label)`. **Untested live** — needs a laptop run with `GOOGLE_API_KEY` set.
-- [ ] **`agents/adaptive_scheduler.py`** — Gemini Flash. Periodically re-ranks remaining gaps based on elapsed time and event phase. Writes the reprioritized manifest back to `data/coverage_manifest.json`.
+- [x] **`agents/adaptive_scheduler.py`** — shipped. Public surface: `reschedule(manifest, captured, elapsed_seconds, event_duration_seconds) -> dict`. Uses `gemini-2.5-flash`. Returns a schedule-update `{event_phase, priority_order, urgency_notes, drop}`. **Stateless** — the multi-agent notebook is the right place to actually re-order the manifest and persist to `data/coverage_manifest.json`. **Untested live.**
 - [ ] **`notebooks/03_multi_agent.ipynb`** — wires all five agents together using fixtures (sample brief, sample frames) so the full flow can be exercised without a camera.
 - [ ] **Tests:** at minimum, JSON-schema checks on the Director output and the Context Ingestor output. Run in CI eventually.
 - [ ] **Hardening:** graceful failure when API keys are missing (right now `director.py` raises `KeyError` on first call); structured logging instead of `print()`.
@@ -93,6 +93,13 @@ In suggested order — each is independently shippable:
   print(analyze_frame(frame, STUB_MANIFEST))
   ```
   Then point the camera at something that *should* match a required shot and confirm `satisfies` and `category` come back correctly.
+- [ ] **Smoke-test Adaptive Scheduler.** Pure text, no camera needed:
+  ```python
+  from lens.agents.adaptive_scheduler import reschedule
+  from lens.manifest import STUB_MANIFEST
+  print(reschedule(STUB_MANIFEST, captured=["sponsor_logo"], elapsed_seconds=4800, event_duration_seconds=7200))
+  ```
+  Confirm `priority_order` only contains uncaptured labels and `event_phase` reflects ~66% elapsed (should land on `closing` or `mid` depending on the model's read).
 - [ ] Once `03_multi_agent.ipynb` lands: walk through the multi-agent loop on the laptop with the real camera.
 
 ### Pi sessions (later)
