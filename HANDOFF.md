@@ -2,7 +2,7 @@
 
 **Last updated:** June 24, 2026
 **Active branch:** `claude/youthful-sagan-fbluj3`
-**Latest commit:** `43ebd7e` (shape tests for the three Day-2 agents)
+**Latest commit:** `<pending>` (Director shape test + friendly missing-key errors)
 
 This doc is the single source of truth for project state. Read it first whenever resuming, on web or local laptop.
 
@@ -70,7 +70,8 @@ In suggested order — each is independently shippable:
 - [x] **`agents/footage_analyzer.py`** — shipped. Public surface: `analyze_frame(image: PIL.Image, manifest: dict) -> dict`. Uses `gemini-2.5-flash`. The agent is stateless — the caller (notebook / scheduler) is responsible for taking a non-null `satisfies` value and calling `CoverageMemory.add_capture(label)`. **Untested live** — needs a laptop run with `GOOGLE_API_KEY` set.
 - [x] **`agents/adaptive_scheduler.py`** — shipped. Public surface: `reschedule(manifest, captured, elapsed_seconds, event_duration_seconds) -> dict`. Uses `gemini-2.5-flash`. Returns a schedule-update `{event_phase, priority_order, urgency_notes, drop}`. **Stateless** — the multi-agent notebook is the right place to actually re-order the manifest and persist to `data/coverage_manifest.json`. **Untested live.**
 - [ ] **`notebooks/03_multi_agent.ipynb`** — wires all five agents together using fixtures (sample brief, sample frames) so the full flow can be exercised without a camera.
-- [x] **Tests:** shape checks for Context Ingestor, Footage Analyzer, Adaptive Scheduler. Each makes one real API call. Skip cleanly when keys are missing. Director still has no test (it's exercised by `01_core_loop.ipynb`).
+- [x] **Tests:** shape checks for **all four LLM agents** (Context Ingestor, Director, Footage Analyzer, Adaptive Scheduler). Each makes one real API call. Skip cleanly when keys are missing.
+- [x] **Friendly missing-key errors.** `lens._env.require()` replaces `os.environ[KEY]` everywhere; misconfiguration now raises a clear `RuntimeError` pointing at `.env` instead of `KeyError`.
 - [ ] **Hardening:** graceful failure when API keys are missing (right now `director.py` raises `KeyError` on first call); structured logging instead of `print()`.
 
 ### Evening I/O queue (laptop only)
