@@ -2,7 +2,7 @@
 
 **Last updated:** June 24, 2026
 **Active branch:** `claude/youthful-sagan-fbluj3`
-**Latest commit:** `<pending>` (Adaptive Scheduler)
+**Latest commit:** `881f89a` (Adaptive Scheduler — all five agents scaffolded)
 
 This doc is the single source of truth for project state. Read it first whenever resuming, on web or local laptop.
 
