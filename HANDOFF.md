@@ -2,7 +2,7 @@
 
 **Last updated:** June 24, 2026
 **Active branch:** `claude/youthful-sagan-fbluj3`
-**Latest commit:** `881f89a` (Adaptive Scheduler — all five agents scaffolded)
+**Latest commit:** `<pending>` (shape tests for the three Day-2 agents)
 
 This doc is the single source of truth for project state. Read it first whenever resuming, on web or local laptop.
 
@@ -34,10 +34,11 @@ git pull
 
 Then verify your local env still works:
 
-1. `.env` exists at repo root with `ANTHROPIC_API_KEY=...` (and `GOOGLE_API_KEY=...` once we land Day-2 agents that need it). The `.env` file is gitignored on purpose — you create it once per device.
+1. `.env` exists at repo root with `ANTHROPIC_API_KEY=...` and `GOOGLE_API_KEY=...`. The `.env` file is gitignored on purpose — you create it once per device.
 2. `pip install -r lens/requirements.txt` inside your venv (re-run if `requirements.txt` changed in the latest pull — check `git log -- lens/requirements.txt`).
-3. Read the **Current state** section below to see what's new since you last looked.
-4. Pick a task from the **Evening I/O queue** to run on the laptop. These are the things only the laptop can do.
+3. **Run the shape tests first — fastest signal that the Day-2 agents work:** `pytest tests/ -v` from the repo root. Three tests, each one real API call, ~10 seconds total. Green here means all three Day-2 agents respect their JSON contract. If any are red, fix before touching the notebook.
+4. Read the **Current state** section below to see what's new since you last looked.
+5. Pick a task from the **Evening I/O queue** to run on the laptop. These are the things only the laptop can do.
 
 When you finish an evening task, push any code changes (if any) and update this doc with what you confirmed working.
 
@@ -69,7 +70,7 @@ In suggested order — each is independently shippable:
 - [x] **`agents/footage_analyzer.py`** — shipped. Public surface: `analyze_frame(image: PIL.Image, manifest: dict) -> dict`. Uses `gemini-2.5-flash`. The agent is stateless — the caller (notebook / scheduler) is responsible for taking a non-null `satisfies` value and calling `CoverageMemory.add_capture(label)`. **Untested live** — needs a laptop run with `GOOGLE_API_KEY` set.
 - [x] **`agents/adaptive_scheduler.py`** — shipped. Public surface: `reschedule(manifest, captured, elapsed_seconds, event_duration_seconds) -> dict`. Uses `gemini-2.5-flash`. Returns a schedule-update `{event_phase, priority_order, urgency_notes, drop}`. **Stateless** — the multi-agent notebook is the right place to actually re-order the manifest and persist to `data/coverage_manifest.json`. **Untested live.**
 - [ ] **`notebooks/03_multi_agent.ipynb`** — wires all five agents together using fixtures (sample brief, sample frames) so the full flow can be exercised without a camera.
-- [ ] **Tests:** at minimum, JSON-schema checks on the Director output and the Context Ingestor output. Run in CI eventually.
+- [x] **Tests:** shape checks for Context Ingestor, Footage Analyzer, Adaptive Scheduler. Each makes one real API call. Skip cleanly when keys are missing. Director still has no test (it's exercised by `01_core_loop.ipynb`).
 - [ ] **Hardening:** graceful failure when API keys are missing (right now `director.py` raises `KeyError` on first call); structured logging instead of `print()`.
 
 ### Evening I/O queue (laptop only)

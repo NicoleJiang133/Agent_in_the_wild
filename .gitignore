@@ -26,3 +26,6 @@ moondream-*
 
 # Coverage memory (runtime state, not source)
 lens/data/coverage_memory.json
+
+# Pytest
+.pytest_cache/
