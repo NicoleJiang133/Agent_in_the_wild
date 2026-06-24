@@ -1,10 +1,11 @@
 """Agent 4: Footage Analyzer — Gemini Flash labels a captured clip against the manifest."""
 import json
-import os
 import re
 
 import google.generativeai as genai
 from PIL import Image
+
+from lens._env import require
 
 _model = None
 _configured = False
@@ -36,7 +37,7 @@ CoverageManifest:
 def _ensure_model() -> None:
     global _model, _configured
     if not _configured:
-        genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
+        genai.configure(api_key=require("GOOGLE_API_KEY"))
         _configured = True
     if _model is None:
         _model = genai.GenerativeModel("gemini-2.5-flash")

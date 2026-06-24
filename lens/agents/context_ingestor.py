@@ -1,10 +1,11 @@
 """Agent 1: Context Ingestor — Claude Haiku turns an event brief into a CoverageManifest."""
 import json
-import os
 import re
 from typing import Optional
 
 import anthropic
+
+from lens._env import require
 
 _client: Optional[anthropic.Anthropic] = None
 
@@ -41,7 +42,7 @@ def ingest_brief(brief_text: str) -> dict:
     """Turn a free-form event brief into a CoverageManifest dict."""
     global _client
     if _client is None:
-        _client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+        _client = anthropic.Anthropic(api_key=require("ANTHROPIC_API_KEY"))
 
     response = _client.messages.create(
         model="claude-haiku-4-5",

@@ -1,9 +1,10 @@
 """Agent 5: Adaptive Scheduler — Gemini Flash reprioritizes remaining gaps based on event phase."""
 import json
-import os
 import re
 
 import google.generativeai as genai
+
+from lens._env import require
 
 _model = None
 _configured = False
@@ -40,7 +41,7 @@ Elapsed: {elapsed}s of estimated {duration}s (~{percent}% through)
 def _ensure_model() -> None:
     global _model, _configured
     if not _configured:
-        genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
+        genai.configure(api_key=require("GOOGLE_API_KEY"))
         _configured = True
     if _model is None:
         _model = genai.GenerativeModel("gemini-2.5-flash")

@@ -1,9 +1,10 @@
 """Agent 3: Director — Claude Haiku 4.5 with prompt caching for coverage directives."""
 import json
-import os
 from typing import Optional
 
 import anthropic
+
+from lens._env import require
 
 _client: Optional[anthropic.Anthropic] = None
 
@@ -44,7 +45,7 @@ def get_directive(
     """
     global _client
     if _client is None:
-        _client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+        _client = anthropic.Anthropic(api_key=require("ANTHROPIC_API_KEY"))
 
     manifest_text = json.dumps(manifest, indent=2)
 
