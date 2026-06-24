@@ -2,7 +2,7 @@
 
 **Last updated:** June 24, 2026
 **Active branch:** `claude/youthful-sagan-fbluj3`
-**Latest commit:** `52fbbfb` (Context Ingestor + fixture brief)
+**Latest commit:** `<pending>` (Footage Analyzer)
 
 This doc is the single source of truth for project state. Read it first whenever resuming, on web or local laptop.
 
@@ -66,7 +66,7 @@ When you finish an evening task, push any code changes (if any) and update this 
 In suggested order — each is independently shippable:
 
 - [x] **`agents/context_ingestor.py`** — shipped in `52fbbfb`. Public surface: `ingest_brief(brief_text: str) -> dict`. Fixture: `tests/fixtures/sample_brief.txt`. **Untested live** — needs a laptop run with `ANTHROPIC_API_KEY` set to confirm the JSON parses end-to-end against `STUB_MANIFEST`'s shape.
-- [ ] **`agents/footage_analyzer.py`** — Gemini Flash. Takes a captured clip (or a representative frame), returns which required-shot label it satisfies. Calls into `CoverageMemory.add_capture()`.
+- [x] **`agents/footage_analyzer.py`** — shipped. Public surface: `analyze_frame(image: PIL.Image, manifest: dict) -> dict`. Uses `gemini-2.5-flash`. The agent is stateless — the caller (notebook / scheduler) is responsible for taking a non-null `satisfies` value and calling `CoverageMemory.add_capture(label)`. **Untested live** — needs a laptop run with `GOOGLE_API_KEY` set.
 - [ ] **`agents/adaptive_scheduler.py`** — Gemini Flash. Periodically re-ranks remaining gaps based on elapsed time and event phase. Writes the reprioritized manifest back to `data/coverage_manifest.json`.
 - [ ] **`notebooks/03_multi_agent.ipynb`** — wires all five agents together using fixtures (sample brief, sample frames) so the full flow can be exercised without a camera.
 - [ ] **Tests:** at minimum, JSON-schema checks on the Director output and the Context Ingestor output. Run in CI eventually.
@@ -84,6 +84,15 @@ In suggested order — each is independently shippable:
   import json; print(json.dumps(manifest, indent=2))
   ```
   Confirm the dict has keys `event_name`, `themes`, `desired_output`, `key_moments`, `required_shots`, `preferred_shots` — same shape as `STUB_MANIFEST`. Then try a real brief of your own.
+- [ ] **Smoke-test Footage Analyzer.** Capture a frame, run it against your manifest, eyeball the label:
+  ```python
+  from lens.camera import capture_frame
+  from lens.agents.footage_analyzer import analyze_frame
+  from lens.manifest import STUB_MANIFEST   # or the real one from above
+  frame = capture_frame()
+  print(analyze_frame(frame, STUB_MANIFEST))
+  ```
+  Then point the camera at something that *should* match a required shot and confirm `satisfies` and `category` come back correctly.
 - [ ] Once `03_multi_agent.ipynb` lands: walk through the multi-agent loop on the laptop with the real camera.
 
 ### Pi sessions (later)
